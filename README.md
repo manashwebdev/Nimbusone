@@ -8,7 +8,7 @@ Scroll-driven 3D product page for the NIMBUS ONE running sneaker. Three.js, GSAP
 - Page background and accent colours change per section and per finish
 - Count-up stats, FAQ accordion, marquee footer, custom cursor
 - Responsive, keyboard-focusable, respects reduced motion
-hiiii
+
 ## Screenshots
 | | |
 |---|---|
