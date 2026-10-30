@@ -1,5 +1,5 @@
 # NIMBUS ONE
-hi
+
 Scroll-driven 3D product page for the NIMBUS ONE running sneaker. Three.js, GSAP and Lenis in one HTML file, with a finish picker (Cloud, Coral, Ink, Mint) that recolours the shoe and the page.
 
 ## Features
