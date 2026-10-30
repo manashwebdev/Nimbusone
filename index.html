@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NIMBUS ONE — Light enough to forget they’re on.</title>
+<meta name="description" content="Scroll-driven 3D product page for the NIMBUS ONE running sneaker. Three.js, GSAP and Lenis in one HTML file, with a finish picker that recolours the page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EEE9F6;--fg:#1B1034;--ac:#E8304F;--serif:'Instrument Serif',Georgia,serif;--sans:'Figtree',system-ui,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit;margin:0}
+html.lenis,html.lenis body{height:auto}.lenis.lenis-smooth{scroll-behavior:auto!important}
+body{background:var(--bg);color:var(--fg);font:400 1.08rem/1.6 var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased}
+canvas#gl{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+.grid{position:fixed;inset:0;z-index:0;pointer-events:none;margin:0 clamp(1rem,4vw,3.5rem);background:linear-gradient(90deg,color-mix(in srgb,var(--fg) 14%,transparent) 1px,transparent 1px) 0 0/calc(100%/12) 100%;border-right:1px solid color-mix(in srgb,var(--fg) 14%,transparent)}
+nav{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:1.2rem clamp(1rem,4vw,3.5rem);color:var(--fg)}
+.logo{font:400 1.7rem/1 var(--serif);letter-spacing:-.02em;text-decoration:none;color:inherit}
+nav ul{display:flex;gap:2.2rem;list-style:none;padding:0}
+a{color:inherit}nav a{text-decoration:none;font-weight:500;font-size:.98rem}
+.pre{font:400 1.25rem var(--serif);border-bottom:1.5px solid currentColor;padding-bottom:2px;text-decoration:none}
+section{position:relative;z-index:2;min-height:100svh;padding:7rem clamp(1rem,4vw,3.5rem) 4rem;display:flex;flex-direction:column;justify-content:center}
+.col{max-width:34rem}.right{margin-left:auto;width:min(36rem,44%)}
+.eyebrow{font-size:.82rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500;opacity:.75;margin-bottom:1.4rem}
+h1,h2,.big{font:400 clamp(3.2rem,8.4vw,8.6rem)/.9 var(--serif);letter-spacing:-.035em}
+h2{font-size:clamp(2.6rem,6vw,6rem)}
+em{font-style:italic;color:var(--ac)}
+.lead{margin-top:2rem;max-width:30rem;opacity:.82;font-size:1.12rem}
+.ln{display:block;overflow:hidden;padding-bottom:.08em}.ln>span{display:block}
+.btns{display:flex;gap:1.4rem;align-items:center;margin-top:2.2rem;flex-wrap:wrap}
+.btn{font:600 .95rem var(--sans);background:var(--ac);color:#fff;border:0;border-radius:99px;padding:.95rem 1.6rem;cursor:pointer;text-decoration:none;transition:transform .35s cubic-bezier(.2,.8,.2,1),filter .3s}
+.btn:hover{transform:translateY(-2px);filter:brightness(1.1)}
+.link{font-weight:500;text-underline-offset:5px}
+.live{position:absolute;right:clamp(1rem,4vw,3.5rem);bottom:2.2rem;font:600 .82rem var(--sans);letter-spacing:.12em;text-transform:uppercase;font-variant-numeric:tabular-nums}
+.num{font:400 clamp(7rem,19vw,19rem)/.8 var(--serif);letter-spacing:-.05em;display:flex;align-items:baseline;gap:.15em}
+.num i{font-size:.22em;color:var(--ac);letter-spacing:0}
+.stat h3{font:400 2rem/1.1 var(--serif);margin:2rem 0 .5rem}
+.faq{border-top:1px solid color-mix(in srgb,var(--fg) 25%,transparent);margin-top:2.2rem}
+.q{border-bottom:1px solid color-mix(in srgb,var(--fg) 25%,transparent)}
+.q button{all:unset;box-sizing:border-box;width:100%;padding:1.2rem 0;font:400 1.5rem/1.2 var(--serif);cursor:pointer;display:flex;justify-content:space-between;gap:1rem}
+.q button::after{content:"+";font:300 1.6rem var(--sans);transition:transform .4s}.q.open button::after{transform:rotate(45deg)}
+.q button:focus-visible,.btn:focus-visible,.sw:focus-visible,a:focus-visible{outline:2px solid var(--ac);outline-offset:4px}
+.q div{display:grid;grid-template-rows:0fr;transition:grid-template-rows .5s cubic-bezier(.2,.8,.2,1)}.q.open div{grid-template-rows:1fr}
+.q p{overflow:hidden;opacity:.8}.q.open p{padding-bottom:1.2rem}
+.price{font:400 clamp(5rem,11vw,10rem)/.85 var(--serif);letter-spacing:-.04em;margin:1rem 0 1.6rem}
+.fin{display:flex;align-items:center;gap:.9rem;margin-bottom:1.6rem;font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.sw{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;box-shadow:inset 0 0 0 2px var(--bg);transition:transform .3s}
+.sw:hover{transform:scale(1.12)}.sw[aria-pressed=true]{border-color:var(--fg)}
+.perks{list-style:none;padding:0;margin-top:2.4rem;font:400 1.5rem/1.9 var(--serif)}
+.perks li{border-top:1px solid color-mix(in srgb,var(--fg) 20%,transparent)}
+.wrap{position:relative;z-index:3;background:var(--bg);overflow:hidden}
+.last{min-height:70svh}.last h2{max-width:14ch}
+.mq{white-space:nowrap;font:400 clamp(1.4rem,3vw,2.6rem) var(--serif);padding:2.5rem 0 1rem}
+.mq div{display:inline-block;will-change:transform}.mq em{margin:0 1.5rem}
+.word{font:400 clamp(4rem,17.5vw,20rem)/.82 var(--serif);letter-spacing:-.04em;text-align:center;white-space:nowrap;padding:0 0 1.5rem}
+.foot{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;padding:0 clamp(1rem,4vw,3.5rem) 2.5rem;font-size:.85rem}
+.foot nav{all:unset}.foot span{display:flex;gap:1.4rem;flex-wrap:wrap}
+.cur{position:fixed;left:0;top:0;width:36px;height:36px;margin:-18px 0 0 -18px;border:1.5px solid var(--fg);border-radius:50%;z-index:50;pointer-events:none;transition:width .3s,height .3s,margin .3s,background .3s}
+.cur.on{width:64px;height:64px;margin:-32px 0 0 -32px;background:color-mix(in srgb,var(--ac) 22%,transparent)}
+@media(hover:none){.cur{display:none}}
+@media(max-width:820px){nav ul{display:none}section{justify-content:flex-start;padding-top:6.5rem}.right{width:100%;margin:0}.live{display:none}.num{font-size:clamp(6rem,30vw,10rem)}.lead{font-size:1rem}.perks{font-size:1.2rem;margin-top:1rem}}
+</style>
+</head>
+<body>
+<div class="grid"></div><div class="cur"></div><canvas id="gl" aria-hidden="true"></canvas>
+<nav><a class="logo" href="#top">NIMBUS ONE</a>
+<ul><li><a href="#case">Weight</a></li><li><a href="#reserve">Foam</a></li><li><a href="#water">Wear</a></li><li><a href="#faq">Specs</a></li></ul>
+<a class="pre" href="#order">Pre-order</a></nav>
+
+<main id="top">
+<section data-i="0" data-t="light">
+<div class="col" style="max-width:none"><p class="eyebrow">Nimbus One, road running shoe</p>
+<h1 aria-label="Light enough to forget they’re on."><span class="ln"><span>Light enough</span></span><span class="ln"><span>to <em>forget</em></span></span><span class="ln"><span>they’re on.</span></span></h1>
+<p class="lead">A 212&nbsp;g road runner with a knit upper that locks your heel, a 38&nbsp;mm foam stack and a rocker that rolls you forward.</p>
+<div class="btns"><a class="btn" href="#order">Pre-order for $149</a><a class="link" href="#problem">See how it works</a></div></div>
+<div class="live" id="live">Size 9 · 212 g</div></section>
+
+<section id="problem" data-i="1" data-t="light"><div class="col"><p class="eyebrow">The problem</p>
+<h2>Most running shoes feel <em>heavy</em> by the tenth kilometre.</h2>
+<p class="lead">Foam goes flat, laces loosen and heels slip. Nimbus One pairs a foam that keeps its bounce with a one-piece knit that holds your foot still.</p></div></section>
+
+<section id="case" class="stat" data-i="2" data-t="dark"><div class="col"><p class="eyebrow">Weight</p>
+<div class="big num"><b data-n="212">0</b><i>g</i></div><h3>Lighter than a phone</h3>
+<p class="lead" style="margin-top:0">A single-layer knit and a hollow-core midsole bring a size 9 down to 212 grams.</p></div></section>
+
+<section id="reserve" class="stat" data-i="3" data-t="dark"><div class="col"><p class="eyebrow">Foam</p>
+<div class="big num"><b data-n="38">0</b><i>mm</i></div><h3>Soft on top, firm below</h3>
+<p class="lead" style="margin-top:0">A soft top layer takes the impact. A firmer base pushes back so each stride costs less effort.</p></div></section>
+
+<section id="water" class="stat" data-i="4" data-t="dark"><div class="col"><p class="eyebrow">Wear</p>
+<div class="big num"><b data-n="800">0</b><i>km</i></div><h3>A season, not a month</h3>
+<p class="lead" style="margin-top:0">Outsole rubber sits only where you land, so the grip lasts about 800 kilometres.</p></div></section>
+
+<section id="faq" data-i="5" data-t="light"><div class="right"><p class="eyebrow">Questions</p><h2>Before you <em>buy.</em></h2>
+<div class="faq">
+<div class="q"><button aria-expanded="false">Do they run true to size?</button><div><p>Yes. If you are between sizes, go up half a size.</p></div></div>
+<div class="q"><button aria-expanded="false">Can I walk or train in them?</button><div><p>Yes for walking and cardio. For heavy lifting a flatter shoe is a better fit.</p></div></div>
+<div class="q"><button aria-expanded="false">What if they don't fit?</button><div><p>Send them back within 30 days for a full refund, worn or not.</p></div></div>
+</div></div></section>
+
+<section id="order" data-i="6" data-t="order"><div class="right"><p class="eyebrow">Order</p>
+<div class="price">$149</div>
+<div class="fin"><span id="finName">Finish: Cloud</span><span id="sws"></span></div>
+<button class="btn" id="cart">Add to cart</button>
+<ul class="perks"><li>Free shipping</li><li>30-day returns</li><li>1-year warranty</li></ul></div></section>
+
+<div class="wrap" data-i="6" data-t="last">
+<section class="last"><p class="eyebrow">Last call</p>
+<h2>Run in them for 30 days. <em>Keep them</em> or send them back.</h2>
+<div class="btns"><a class="btn" href="#order">Pre-order for $149</a></div></section>
+<div class="mq"><div id="mq"></div></div>
+<div class="word">NIMBUS ONE</div>
+<div class="foot"><p>Designed and built by Manash, full-stack developer. Available for freelance work.</p><span><a href="#top">Instagram</a><a href="#top">GitHub</a><a href="#top">LinkedIn</a></span></div>
+</div>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+<script>
+gsap.registerPlugin(ScrollTrigger);
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, touch=matchMedia('(hover:none)').matches;
+
+/* ---------- smooth scroll ---------- */
+let lenis=null;
+if(window.Lenis&&!reduce){lenis=new Lenis({lerp:.085,wheelMultiplier:.9});lenis.on('scroll',ScrollTrigger.update);gsap.ticker.add(t=>lenis.raf(t*1000));gsap.ticker.lagSmoothing(0)}
+$$('a[href^="#"]').forEach(a=>a.addEventListener('click',e=>{const t=$(a.getAttribute('href'));if(!t)return;e.preventDefault();lenis?lenis.scrollTo(t,{duration:1.6,easing:x=>1-Math.pow(1-x,4)}):t.scrollIntoView({behavior:'smooth'})}));
+
+/* ---------- finishes ---------- */
+const FIN=[
+ {n:'Cloud',up:0xeeeaf5,pan:0xe8304f,sole:0xffffff,bg:'#1B1034',ac:'#FF8FA3',sw:'#eeeaf5'},
+ {n:'Coral',up:0xe8304f,pan:0x1b1034,sole:0xf6efe9,bg:'#4A0D1D',ac:'#FFB3C0',sw:'#e8304f'},
+ {n:'Ink',up:0x2a1b52,pan:0xff8fa3,sole:0xd9d2ea,bg:'#0D0A14',ac:'#FF8FA3',sw:'#2a1b52'},
+ {n:'Mint',up:0x9fe3c4,pan:0x1b1034,sole:0xffffff,bg:'#0E3A31',ac:'#9fe3c4',sw:'#9fe3c4'}];
+let active=-1,fi=0,paint=null;
+function setFinish(i){fi=i;const f=FIN[i];paint&&paint(f);$('#finName').textContent='Finish: '+f.n;$$('.sw').forEach((b,j)=>b.setAttribute('aria-pressed',j===i));if(active===6)theme()}
+FIN.forEach((f,i)=>{const b=document.createElement('button');b.className='sw';b.style.background=f.sw;b.setAttribute('aria-label',f.n+' finish');b.onclick=()=>setFinish(i);$('#sws').append(b)});
+
+/* ---------- poses ---------- */
+const P=[[.5,0,.12,-.5,.05,.82],[.5,.1,.75,-.15,0,.9],[.45,.05,0,.1,0,.95],[.5,.1,.1,.6,0,.9],[.45,0,-1.15,.3,.1,.9],[-.6,.1,.1,.55,.05,.62],[-.5,0,.1,2.7,0,.92]];
+const pose={x:0,y:0,rx:0,ry:0,rz:0,s:1,sp:0};let mx=0,my=0,tx=0,ty=0;
+function go(i,instant){active=i;const p=P[Math.min(i,6)],m=innerWidth<820,hw=Math.tan(.2618)*9*innerWidth/innerHeight;
+ gsap.to(pose,{x:m?0:p[0]*hw*.92,y:m?-1.9:p[1],rx:p[2],ry:p[3],rz:p[4],s:m?p[5]*.72:p[5],duration:instant||reduce?0:1.5,ease:'expo.out',overwrite:true})}
+const LIGHT={bg:'#EEE9F6',fg:'#1B1034',ac:'#E8304F'},DARK={bg:'#1B1034',fg:'#F1ECFA',ac:'#FF8FA3'},LAST={bg:'#E8304F',fg:'#FFF4F6',ac:'#1B1034'};
+function theme(){const t=document.body.dataset.t,o=t==='light'?LIGHT:t==='dark'?DARK:t==='last'?LAST:{bg:FIN[fi].bg,fg:'#EEF0F5',ac:FIN[fi].ac};
+ gsap.to(document.documentElement,{'--bg':o.bg,'--fg':o.fg,'--ac':o.ac,duration:reduce?0:.9,ease:'power2.out',overwrite:'auto'})}
+$$('[data-i]').forEach(el=>ScrollTrigger.create({trigger:el,start:'top 55%',end:'bottom 55%',onToggle:s=>{if(!s.isActive)return;document.body.dataset.t=el.dataset.t;theme();go(+el.dataset.i)}}));
+
+/* ---------- counters, FAQ, reveals ---------- */
+$$('[data-n]').forEach(b=>{const n=+b.dataset.n,o={v:0};ScrollTrigger.create({trigger:b,start:'top 75%',once:true,onEnter:()=>gsap.to(o,{v:n,duration:reduce?0:1.8,ease:'power3.out',onUpdate:()=>b.textContent=Math.round(o.v)})})});
+$$('.q button').forEach(b=>b.onclick=()=>{const q=b.parentElement,o=q.classList.toggle('open');b.setAttribute('aria-expanded',o)});
+$$('.lead,.eyebrow,.btns,.faq,.price,.fin,.perks,.stat h3').forEach(el=>gsap.from(el,{y:24,opacity:0,duration:reduce?0:.9,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',once:true}}));
+gsap.fromTo('.ln>span',{yPercent:105},{yPercent:0,duration:reduce?0:1.3,ease:'expo.out',stagger:.12,delay:.2});
+$('#cart').onclick=e=>{const b=e.currentTarget;b.textContent='Added to cart';setTimeout(()=>b.textContent='Add to cart',1800)};
+
+/* ---------- marquee + clock + cursor ---------- */
+$('#mq').innerHTML=Array(6).fill('Light enough to forget they’re on.<em>●</em>').join('');
+gsap.to('#mq',{xPercent:-50,duration:30,ease:'none',repeat:-1});$('#mq').innerHTML+=$('#mq').innerHTML;
+const cur=$('.cur');let cx=0,cy=0,px=0,py=0;
+addEventListener('pointermove',e=>{px=e.clientX;py=e.clientY;mx=e.clientX/innerWidth*2-1;my=e.clientY/innerHeight*2-1});
+$$('a,button').forEach(el=>{el.addEventListener('pointerenter',()=>cur.classList.add('on'));el.addEventListener('pointerleave',()=>cur.classList.remove('on'))});
+
+/* ---------- 3D sneaker ---------- */
+gsap.ticker.add(()=>{cx+=(px-cx)*.18;cy+=(py-cy)*.18;cur.style.transform=`translate(${cx}px,${cy}px)`});
+function start3D(){
+ const R=new THREE.WebGLRenderer({canvas:$('#gl'),antialias:true,alpha:true});
+ R.setPixelRatio(Math.min(devicePixelRatio,2));R.outputEncoding=THREE.sRGBEncoding;R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=1.1;
+ const S=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,.1,50);cam.position.z=9;
+ S.add(new THREE.HemisphereLight(0xffffff,0x7a6aa8,.95));
+ [[0xffffff,1.5,3,6,5],[0xff9fb2,.9,-5,2,-4],[0xcfd8ff,.5,-3,-2,4]].forEach(a=>{const l=new THREE.DirectionalLight(a[0],a[1]);l.position.set(a[2],a[3],a[4]);S.add(l)});
+ const kc=document.createElement('canvas');kc.width=kc.height=64;const kx=kc.getContext('2d');kx.fillStyle='#808080';kx.fillRect(0,0,64,64);kx.strokeStyle='#fff';kx.lineWidth=3;
+ for(let y=0;y<64;y+=16)for(let x=0;x<64;x+=16){kx.beginPath();kx.moveTo(x,y);kx.lineTo(x+8,y+12);kx.lineTo(x+16,y);kx.stroke()}
+ const kt=new THREE.CanvasTexture(kc);kt.wrapS=kt.wrapT=THREE.RepeatWrapping;kt.repeat.set(36,18);
+ const std=(c,r,o)=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:r,metalness:0,side:THREE.DoubleSide},o));
+ const mUp=std(0xffffff,.85,{bumpMap:kt,bumpScale:1}),mPan=std(0xffffff,.6),mSole=std(0xffffff,.5),mOut=std(0x15111f,.9),mCol=std(0x15111f,.9),mLace=std(0xf4f0fa,.7),mIn=std(0x2a2535,.9);
+ const W=new THREE.Group(),G=new THREE.Group();G.position.y=-.35;W.add(G);S.add(W);
+ const L=3.1,P2=Math.PI,H2=P2/2;
+ const li=(xs,ys,u)=>{let i=0;while(i<xs.length-2&&u>xs[i+1])i++;const t=Math.max(0,Math.min(1,(u-xs[i])/(xs[i+1]-xs[i])));return ys[i]+(ys[i+1]-ys[i])*t};
+ const ss=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t)};
+ const rd=u=>u<.09?Math.sqrt(1-Math.pow(1-u/.09,2)):u>.91?Math.sqrt(1-Math.pow((u-.91)/.09,2)):1;
+ const Wd=u=>li([0,.12,.3,.5,.7,.88,1],[.3,.4,.47,.38,.37,.4,.3],u)*rd(u);
+ const Hd=u=>li([0,.12,.3,.5,.62,.8,.92,1],[.2,.3,.42,.56,.78,.92,.85,.6],u)*rd(u);
+ const gap=u=>.9*ss(.58,.68,u)*(1-.75*ss(.9,.99,u)),te=u=>H2-gap(u);
+ function loft(u0,u1,rng,s,mat,nu){nu=nu||48;const nv=20,pos=[],uv=[],ix=[];
+  for(let i=0;i<=nu;i++){const u=u0+(u1-u0)*i/nu,w=Wd(u)*s,h=Hd(u)*s,r=rng(u);
+   for(let j=0;j<=nv;j++){const th=r[0]+(r[1]-r[0])*j/nv;pos.push((u-.5)*L,h*Math.sin(th),w*Math.cos(th));uv.push(u,j/nv)}}
+  for(let i=0;i<nu;i++)for(let j=0;j<nv;j++){const a=i*(nv+1)+j,b=a+nv+1;ix.push(a,b,a+1,b,b+1,a+1)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.setIndex(ix);g.computeVertexNormals();G.add(new THREE.Mesh(g,mat))}
+ loft(0,.6,u=>[0,P2],1,mUp,30);
+ loft(.6,1,u=>[0,te(u)],1,mUp);loft(.6,1,u=>[P2-te(u),P2],1,mUp);
+ loft(0,.17,u=>[0,P2],1.014,mPan,24);
+ loft(.8,.99,u=>[0,te(u)],1.014,mPan);loft(.8,.99,u=>[P2-te(u),P2],1.014,mPan);
+ loft(.2,.4,u=>[.15,.95],1.012,mPan,20);loft(.2,.4,u=>[P2-.95,P2-.15],1.012,mPan,20);
+ const sh=new THREE.Shape(),N=40,ez=u=>Wd(u)+.07*rd(u);
+ for(let i=0;i<=N;i++){const u=i/N;i?sh.lineTo((u-.5)*L,ez(u)):sh.moveTo((u-.5)*L,ez(u))}
+ for(let i=N;i>=0;i--){const u=i/N;sh.lineTo((u-.5)*L,-ez(u))}
+ const ex=(d,b)=>new THREE.ExtrudeGeometry(sh,{depth:d,bevelEnabled:true,bevelThickness:b,bevelSize:b,bevelSegments:4,curveSegments:1}).rotateX(-H2);
+ const mid=new THREE.Mesh(ex(.16,.04),mSole);mid.position.y=-.14;G.add(mid);
+ const out=new THREE.Mesh(ex(.05,.02),mOut);out.position.y=-.27;G.add(out);
+ const ins=new THREE.Mesh(new THREE.ShapeGeometry(sh).rotateX(-H2),mIn);ins.scale.set(.9,1,.88);ins.position.y=.02;G.add(ins);
+ const tube=(p,r,m)=>G.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(p),48,r,8),m));
+ [1,0].forEach(sg=>{const p=[];for(let i=0;i<=30;i++){const u=.6+.395*i/30,th=sg?te(u):P2-te(u);p.push(new THREE.Vector3((u-.5)*L,Hd(u)*Math.sin(th)*1.01,Wd(u)*Math.cos(th)*1.01))}tube(p,.05,mCol)});
+ [.3,.37,.44,.51,.57].forEach(u=>{const p=[];for(let j=0;j<=14;j++){const th=.12+(P2-.24)*j/14;p.push(new THREE.Vector3((u-.5)*L,Hd(u)*1.035*Math.sin(th),Wd(u)*1.035*Math.cos(th)))}tube(p,.03,mLace)});
+ const tg=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),mUp);tg.scale.set(.62,.09,.3);tg.position.set(.55,.8,0);tg.rotation.z=.35;G.add(tg);
+ const tw=(m,c)=>{const t=new THREE.Color(c);gsap.to(m.color,{r:t.r,g:t.g,b:t.b,duration:.8})};
+ paint=f=>{tw(mUp,f.up);tw(mPan,f.pan);tw(mSole,f.sole)};paint(FIN[fi]);
+ const size=()=>{R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();go(Math.max(active,0),true)};
+ addEventListener('resize',size);size();
+ if(!reduce){pose.ry=-2.6;go(Math.max(active,0))}
+ let spin=0;
+ gsap.ticker.add(t=>{const v=lenis?lenis.velocity:0;spin+=(Math.max(-1.2,Math.min(1.2,v*.06))-spin)*.08;tx+=(mx-tx)*.06;ty+=(my-ty)*.06;
+  W.position.set(pose.x,pose.y+Math.sin(t*.9)*.06,0);W.rotation.set(pose.rx+ty*.12,pose.ry+tx*.2+spin,pose.rz);W.scale.setScalar(pose.s);R.render(S,cam)});
+}
+document.body.dataset.t='light';theme();go(0,true);setFinish(0);
+try{if(!window.THREE)throw new Error('three.js did not load');start3D()}catch(e){console.error(e);$('#live').textContent='3D preview unavailable in this browser'}
+</script>
+</body>
+</html>
